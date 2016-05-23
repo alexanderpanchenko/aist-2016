@@ -1,0 +1,87 @@
+1) integrate extra material.
+
+
+2) comments
+
+
+On the substance ) one has to go to the crowdsourcing page and read the instructions in Russian, and then only from the conclusion one can infer that the evaluation task was distinguishing 10 top vs. 10 next neighbors.
+
+In short, I suggest making the description of the thesaurus evaluation more explicit - this is the main point the reviewers may complain about.
+
+A couple of minor remarks:
+
+"each complementing another" > "complementing each other"
+
+"Section 7 describes *the* construction of a Russian Distributional Thesaurus"
+
+============================================================================
+  
+
+The submission proposes a set of data with semantic relatedness resources in
+Russian. The availabality of such resources is important of course, but their
+quality must be also surveyed.
+The quality of the proposed resources is questionable: they have small
+coverage, low agreement. Besides, the final resource is derived from the
+automatic systems, which derive their outputs from the input resources, which
+quality is already questionable. I do not beleive that such quality is
+sufficient for advancing the research.
+The Authors should explain what is the purpose of the false negative relations.
+
+============================================================================
+                            REVIEWER #2
+============================================================================
+
+
+---------------------------------------------------------------------------
+Comments
+---------------------------------------------------------------------------
+
+This paper presents a set of datasets for the Russian language that can be used
+for the evaluation of semantic similarity approaches. The datasets are made of
+triples consisting of a pair of words and a similarity score. The datasets are
+definitely interesting and useful, but there are some issues with the paper.
+
+First, it is not clear if the contribution of the paper are the described
+resources or the contribution of the paper is a summary of existing resources
+previously developed by the authors.
+
+Second, while agreement figures are given for some of the datasets, for other
+this information is missing, so that the quality of the described datasets is
+left unclear.
+
+============================================================================
+                            REVIEWER #3
+============================================================================
+
+
+---------------------------------------------------------------------------
+Comments
+---------------------------------------------------------------------------
+
+This abstract presents five semantic relatedness resources for Russian. Each
+resource is represented as a list of triples (word_i, word_j, similarity_ij).
+- Human Judgements (HJ) dataset contains human judgements on 398 word pairs
+that were translated to Russian from the widely used benchmarks for English:
+MC, RG and WordSim353. An in-house crowdsourcing system was used to collect
+human judgements.
+- Synonyms and Hypernyms dataset which contains 114,066 relations for 6,832
+nouns. Half of these relations are synonyms and hypernyms from the RuThes Lite
+thesaurus and half of them are unrelated words.
+- AE dataset for the Cognitive Associations which has the same structure as the
+RT dataset: each source word has the same number of related and unrelated
+target words. Related word pairs were sampled from a Russian Web associative
+experiment.
+- Machine Judgements dataset which contains 12,886 word pairs coming from HJ,
+RT, and AE datasets.
+- Open Russian Distributional Thesaurus which is a large scale resource in the
+format (word_i, word_j, similarity_ij). This resource is built using the
+skip-gram model trained on a 12.9 billion word collection of Russian texts.
+
+Authors mentioned in the paper a manual evaluation of the thesaurus and show a
+precision of 0.94 at 10 top similar words. All these resources are freely
+available for download.
+
+The resources described in this abstract are interesting and important to fill
+the gap of the non-availability of Russian publicly relatedness resources. The
+results obtained after a manual evaluation of the thesaurus are encouraging but
+they need to be confirmed using a large scale evaluation.

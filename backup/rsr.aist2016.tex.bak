@@ -1,0 +1,281 @@
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[russian,english]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{lscape}
+\usepackage{booktabs}
+
+\setlength{\tabcolsep}{3pt}
+
+\begin{document}
+
+\sloppy
+
+\title{Human and Machine Judgements\\about Russian Semantic Relatedness}
+\titlerunning{Human and Machine Judgements about Russian Semantic Relatedness}
+
+\author{Alexander Panchenko\inst{1} \and Dmitry Ustalov\inst{2} \and Nikolay Arefyev\inst{3} \and Denis Paperno\inst{4} \and Natalia Konstantinova\inst{5} \and Natalia Loukachevitch\inst{3}  \and Chris Biemann\inst{1}}
+\authorrunning{Alexander Panchenko et al.}
+
+\institute{
+TU Darmstadt, Darmstadt, Germany \\
+\email{\{panchenko,biem\}@lt.informatik.tu-darmstadt.de} \and
+Ural Federal University, Yekaterinburg, Russia \\
+\email{dmitry.ustalov@urfu.ru} \and
+Moscow State University, Moscow, Russia \\
+\email{louk\_nat@mail.ru} \and
+University of Trento, Rovereto, Italy \\
+\email{denis.paperno@unitn.it} \and
+University of Wolverhampton, Wolverhampton, UK \\
+\email{n.konstantinova@wlv.ac.uk}
+}
+
+\maketitle
+
+\begin{abstract}\hyphenpenalty=10000\exhyphenpenalty=10000
+Semantic relatedness of terms represents similarity of meaning by a numerical score. On the one hand, humans easily make judgements about semantic relatedness of terms. On the other hand, this kind of information is useful in language processing systems. While semantic relatedness has been extensively studied for English using numerous language resources, such as associative norms, human judgements and datasets generated from lexical databases, no evaluation resources for Russian of this kind have been available to date. Our contribution addresses this problem. Namely, we present five language resources of different scale and purpose for Russian semantic relatedness, each being a list of triples ($word_i$, $word_j$, $similarity_{ij}$). Four of them are designed for evaluation of systems for computing  semantic relatedness, complementing each other in terms of the semantic relation type they represent. These benchmarks were tested in a shared task on Russian semantic similarity. We used one of the best approaches identified in this competition to generate the fifth high-coverage resource, a distributional thesaurus of Russian. Multiple evaluations of this thesaurus, including a large-scale crowdsourcing study involving native speakers, indicate its high accuracy.
+\keywords{semantic similarity,  semantic relatedness,  evaluation,  distributional thesaurus,  crowdsourcing,  language resources.}
+\end{abstract}
+
+\section{Introduction}
+
+Semantic relatedness numerically quantifies the degree to which two given lexical units, such as words and multiword expressions, are semantically alike. The relatedness score is high for pairs of words in a semantic relation (e.g., synonyms, hyponyms, associations) and low for semantically unrelated pairs. Semantic relatedness and semantic similarity have been used extensively in psychology and computational linguistics  research~\cite{budanitsky2006evaluating,pedersen2007measures,gabrilovich2007computing,batet2011ontology}. While both concepts are vaguely defined, similarity is a more restricted notion than relatedness, e.g. ``apple'' and ``tree'' would be related but not similar. Semantic relatedness is an important building block of NLP techniques, such as text similarity ~\cite{bar2012ukp,tsatsaronis2010text}, word sense disambiguation~\cite{patwardhan2003using}, query expansion~\cite{hsu2006query} and some others~\cite{panchenko2013similarity}. 
+
+
+While semantic relatedness was extensively studied in the context of English language, Russian NLP community suffered from the lack of publicly available relatedness resources. The datasets presented in this paper are meant to fill this gap. Each of them is a collection of weighted word pairs in the format  $(w_i,w_j,s_{ij})$, e.g.~$(\text{book}, \text{proceedings}, 0.87)$. Here, the $w_i$ is the source word, $w_j$ is the destination word and $s_{ij} \in [0;1]$ is the semantic relatedness score.
+
+More specifically, we present (1) four resources for evaluation and training of semantic relatedness systems varying in size and relation type and (2) the first open distributional thesaurus for the Russian language covering about a million of source words (see \tablename~\ref{tab:resources}). These datasets contain relations between single words. The HJ dataset, further described in Section 3, contains Human Judgements about semantic relatedness; the RuThes (RT) dataset is based on synonyms and hypernyms from a handcrafted thesaurus (see Section 4); the Associative Experiment (AE) dataset, introduced in Section 5, represents cognitive associations between words; the Machine Judgements (MJ) dataset, presented in Section 6, is based on a combination of submissions from a shared task on Russian semantic similarity. Finally, Section 7 describes the construction of a Russian Distributional Thesaurus (RDT).
+
+
+\begin{table}[ht]
+\footnotesize
+
+\centering
+\caption{Format of semantic relations used in the datasets described in this paper. The table shows five most and five least similar words to the word ``книга" (book) in the MJ dataset. 
+}
+\label{tab:resources}
+\begin{tabular}{lll}
+
+\toprule
+\textbf{Source word}, $w_j$     & \textbf{Destination word}, $w_j$  & \textbf{Semantic relatedness}, $s_{ij}$ \\ \midrule
+
+книга (book) &  книжка (book, little book) &  0.719 \\
+книга (book) &  книжечка (little book) &  0.646 \\
+книга (book) &  сборник (proceedings) & 0.643 \\
+книга (book) &  монография (monograph) &  0.574 \\
+книга (book) &  том (volume) &  0.554 \\
+%книга (book) & томик (little volume) & 0.554 \\
+\midrule
+книга (book) &  трест (trust as organization) & 0.151 \\
+книга (book) &  одобрение (approval) &  0.150 \\
+книга (book) &  киль (keel) & 0.130 \\
+книга (book) &  Марокко (Marocco) & 0.124 \\
+книга (book) &  Уругвай (Uruguay) & 0.092 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+
+\begin{table}[ht]
+\footnotesize
+
+\centering
+\caption{Language resources presented in this paper. The star (*) marks the number of manually filtered false negative relations}
+\label{tab:resources}
+\begin{tabular}{l|lllll}
+
+\toprule
+\textbf{Dataset}     & \textbf{HJ}  & \textbf{RT}            & \textbf{AE}           & \textbf{MJ}  & \textbf{RDT}     \\ \midrule
+\# relations         & $398$        & $114\,066$ ($9\,548$*) & $86\,772$ ($3\,002$*) & $12\,886$    & $193\,909\,130$ \\
+\# source words      & $222$        & $6\,832$ ($1,008$*)    & $5\,796$ ($340$*)     & $1\,519$     & $931\,896$      \\
+\# destination words & $306$        & $71\,309$ ($7\,737$*)  & $56\,686$ ($2\,498$*) & $9\,044$     & $4\,456\,444$   \\
+types of relations   & relatedness  & \parbox{2cm}{synonyms,  hypernyms}    & associations          & relatedness  & relatedness     \\
+similarity range     & from 0 to 1  & 0 or 1                 & 0 or 1                & from 0 to 1  & from 0 to 1     \\
+type of words        & single nouns & single nouns           & single nouns          & single nouns & single words   \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{Related Work}
+
+There are three main approaches to evaluating semantic relatedness: using human judgements about word pairs, using semantic relations from lexical-semantic resources, such as WordNet~\cite{miller1995wordnet}, and using data of  cognitive word association experiments. We build three evaluation datasets for Russian each based on one of these principles to enable a comprehensive comparison of relatedness models. 
+
+\subsection{Datasets based on human judgements about word pairs}
+
+Starting with Rubenstein and Goodenough~\cite{Rubenstein:65}, who aggregated human judgments on the relatedness of pairs for a vocabulary of $65$ nouns into the RG dataset. Later, Miller and Charles~\cite{Miller:91} re-did the experiment of Rubenstein and Goodenough obtaining similar results on a subset of $30$ nouns. This dataset is known as the MC dataset. A larger set of $353$ word pairs was put forward by Filkenstein et al.~\cite{Finkelstein:01} as the WordSim353 dataset. 
+
+The three abovementioned  datasets were created for English. To enable similar experiments in other languages, there have been several attempts to translate those datasets into other languages. Gurevych translated the RG and MC datasets into German~\cite{gurevych2005using}; Hassan and Mihalcea translated them into Spanish, Arabic and Romanian~\cite{hassan2009cross}; Postma and Vossen~\cite{postma2014implementation} translated the datasets into Dutch; Jin and Wu~\cite{jin2012semeval} presented a shared task for Chinese semantic similarity, where the authors translated the WordSim353 dataset. Yang and Powers~\cite{yang2006verb} proposed a dataset specifically for measuring verb similarity, which was later translated into German by Meyer and Gurevych~\cite{meyer2012exhibit}.
+
+Hassan and Mihalcea~\cite{hassan2009cross} and Postma and Vossen~\cite{postma2014implementation} divide their translation procedure into the following steps: disambiguation of the English word forms; selection of a translation for each word; additionally, translations were checked to be in the same class of relative frequency as a source English word.
+
+More recently, SimLex-999 was released by Hill et al. \cite{Hill:14}, focusing specifically on similarity and not relatedness. While most datasets are only available in English, SimLex-999 became a notable exception and has been translated into German, Russian and Italian. More recently, a number of datasets assigning different semantic relations to word pairs have appeared, including BLESS~\cite{Baroni:11}.
+
+A comprehensive list of datasets for evaluation of English semantic relatedness, featuring 12 collections, was gathered by Faruqui and Dyer~\cite{faruqui-2014:SystemDemo}. This set of benchmarks was used to build a web application for evaluation and visualization of word vectors.\footnote{\url{http://wordvectors.org/suite.php}}
+
+Similarity and relatedness datasets like the ones mentioned above have become the standard tool for evaluating semantic models. However, such benchmarks have been largely non-existent for Russian to date. In what follows sections, we describe the creation of semantic relatedness resources that are meant to fill this gap.
+
+The HJ dataset presented  in Section~\ref{hj} belongs to this group of evaluation datasets. 
+
+\subsection{Datasets based on lexical-semantic resources}
+
+The second group of evaluation datasets evaluates semantic relatedness scores with respect to relations described in a lexical-semantic resource such as WordNet. Baroni and Lenci~\cite{baroni2011we} stressed that semantically related words differ in the type of relations between them, so they generated the BLESS dataset containing tuples of the form (w1, w2, relation). Types of relations include COORD (co-hyponyms), HYPER (hypernyms), MERO (meronyms), ATTRI (attributes – relation between a noun and an adjective expressing an attribute), EVENT (relation between a noun and a verb referring to actions or events). BLESS also contains, for each concept, a number of random words that were checked to be semantically unrelated to the target word. BLESS includes 200 English concrete single-word nouns having reasonably high frequency that are not very polysemous. The relata of the non-random relations are English nouns, verbs and adjectives selected and validated using several sources including WordNet, Wikipedia and the Web-derived ukWaC corpus.
+
+The RT dataset presented in Section~\ref{rt} belongs to this group of evaluation datasets. 
+
+
+\subsection{Datasets based on human word association experiments}
+The third strain of research evaluates possibilities of current automated systems to simulate the results of human word association experiments. The task originally captured the attention of psychologists, such as Griffiths and Steyvers~\cite{griffiths2003prediction}. One such task was organized in the framework of the Cogalex workshop~\cite{rapp2014cogalex}. The participants received lists of five given words (primes) such as \textit{circus}, \textit{funny}, \textit{nose}, \textit{fool}, and \textit{Coco}, and were supposed to compute the word most closely associated to all of them. In this specific case, the word \textit{clown} is the expected response. 2,000 sets of five input words, together with the expected target words (associative responses) were provided as a training set to participants. The test dataset contained another 2,000 sets of five input words. The training and the test datasets were both derived from the Edinburgh Associative Thesaurus (EAT)~\cite{kiss1973associative}. For each stimulus word, only the top five associations, i.e. the associations produced by the largest number of respondents, were retained, and all other associations were discarded.
+
+The AE dataset presented in Section~\ref{ae} belongs to this group of evaluation datasets. 
+
+\section{Human Judgements about Semantic Similarity}
+
+In this section, we describe our three datasets designed for evaluation of Russian semantic similarity measures. The datasets were tested in the framework of the RUSSE shared task~\cite{panchenko2015russe}. Each participant had to calculate similarities between a collection of word pairs. Then, each submission was assessed using the three benchmarks presented below, each being a subset of the input word pairs.
+
+\subsection{HJ: Human Judgements of Word Pairs}
+\label{hj}
+
+\subsubsection{Description of the dataset.} The HJ dataset is a union of three widely used benchmarks for English: RG, MC and WordSim353. The first dataset, RG, consists of 65 pairs of words collected by Rubenstein and Goodenough~\cite{Rubenstein:65}, who had them judged by 51 human subjects in a scale from 0.0 to 4.0  according to their similarity without considering any other possible semantic relationships that might appear between the terms. For a similar study, Miller and Charles~\cite{Miller:91} chose 30 pairs from the original 65, taking 10 from the "high level (between 3 and 4), 10 from the intermediate level (between 1 and 3), and 10 from the low level (0 to 1) of semantic similarity", and then obtained similarity judgments from 38 subjects, given the same instructions as above, on those 30 pairs. The WordSim353 dataset~\cite{Finkelstein:01} contains 353 word pairs, each associated with an average of 13 to 16 human judgements. In this case, both similarity and relatedness are annotated without any distinction.
+
+Agirre et al.~\cite{agirre2009study} subdivided the WordSim353 dataset into two subsets: the WordSim353 similarity  set and the WordSim353 relatedness  set. The former set consists of word pairs classified as synonyms, antonyms,  identical,  or  hyponym-hyperonym and unrelated pairs. The latter set contains word-pairs connected with other relations and unrelated pairs. The similarity set contains 204 pairs and the relatedness set includes 252  pairs.
+
+HJ dataset contains human judgements on $398$ word pairs that were translated to Russian from the MC, RG and WordSim353. However, we also provide separately translated parts that correspond to each of these datasets. In order to collect human judgements,  an in-house crowdsourcing system was used. Volunteers on Facebook and Twitter were invited to participate in the experiment. Each annotator was provided with a random assignment consisting of $15$ word pairs selected from the $398$ preliminarily prepared pairs, and has been asked to assess the similarity of each pair. The possible options were ``not similar at all'', ``weak similarity'', ``moderate similarity'', and ``high similarity''. Ordinal Krippendorff's alpha of $0.49$ indicates a moderate agreement of annotators in this experiment.
+
+\subsubsection{Evaluation methodology}
+To evaluate a similarity measure using this dataset one should calculate Spearman's rank correlation coefficient $\rho$ between a vector of human judgments and the scores of a given system.
+
+\subsection{RT: Synonyms and Hypernyms from the Thesaurus RuThes}
+\label{rt}
+
+\subsubsection{Description of the dataset.} This dataset follows the structure of the BLESS dataset \cite{Baroni:11}. Each target word has the same number of related and unrelated source words. The dataset contains $114\,066$ relations for $6\,832$ nouns. Half of these relations are synonymy and hypernymy examples from the RuThes-lite thesaurus \cite{Loukachevitch:14} and half of them are unrelated words. To generate negative pairs we used the procedure described in Panchenko et al. \cite{Panchenko:15}. We filtered out false negative relations for $1\,008$ source words with the help of human annotators. Each negative relation in this subset was annotated by at least two annotators. 
+
+\subsubsection{Evaluation methodology.}  To evaluate a similarity measure using this dataset we recommend average precision \cite{Panchenko:15}, but other metrics  also can be used \cite{Baroni:11}.
+
+\subsection{AE: Cognitive Associations from the Sociation.org Experiment}
+\label{ae}
+
+\subsubsection{Description of the dataset.} The structure of this dataset is the same as the structure of the RT dataset: each source word has the same number of related and unrelated target words. Related word pairs were sampled from a Russian web-based associative experiment. In the experiment, users were asked to provide a reaction to an input stimulus source word, e.g.: man $\rightarrow$ woman, time $\rightarrow$ money, and so on. The strength of association in this experiment is quantified by the number of respondents providing the same stimulus-reaction pair. Associative thesauri typically contain a mix of synonyms, hyponyms, meronyms and other types, making relations asymmetric. To build this dataset, we  selected target words with the highest association with the stimulus in Sociation.org data. Like with the other datasets, we used only single-word nouns. Similarly to the RT dataset, we automatically generated negative word pairs and manually filtered out false negatives ($1\,501$ pairs). 
+
+
+\subsubsection{Evaluation methodology.}  As with the RT dataset, to evaluate a similarity measure on this dataset one should use average precision.
+
+\section{Machine Judgements about Semantic Similarity}
+
+\subsection{MJ: Machine Judgements of Word Pairs from the RUSSE Shared Task}
+
+\subsubsection{Construction of the Dataset}
+This dataset contains $12\,886$ word pairs coming from HJ, RT, and AE datasets. In contrast to original hand-labeled binary labels (see \tablename~\ref{tab:resources}) these pairs have continuous relatedness scores. To estimate these scores, we averaged $105$ submissions of the shared task on Russian semantic similarity, RUSSE\footnote{\url{http://russe.nlpub.ru}} \cite{Panchenko:15}. Each run consisted of $12\,886$ word pairs along with their similarity scores. We constructed the dataset from these submissions as follows: 
+
+\begin{enumerate}
+  \item Select one best submission for each of $19$ participating teams for HJ, RT and AE datasets.
+  \item Rank the $19$ best submissions. The best one has rank $r_1=19$; the worst has rank $r_{19}=1$.
+  \item Combine scores of these 19 best submissions as follows: $s_{ij}=\frac{1}{n} \sum^{n}_{k=1} \alpha_k s^{k}_{ij}$, where $n=19$ is the number of participating teams, $s^{k}_{ij}$ is the similarity between words $(w_i, w_j)$ of the $k$-th submission; $\alpha_k$ is the weight of the $k$-th submission. We considered three combination strategies each discounting differently teams with low ranks in the final evaluation. The intuition here is that the best teams provide high quality results, while the others may produce multiple errors. In the first strategy, the $\alpha_k$ weight is rank $r_k$. In the second, strategy, the $\alpha_k$ equals exponent of this rank: $exp(r_k)$. Finally, in the third strategy, the weight equals to the  square root of rank: $\sqrt{r_k}$.~\footnote{We also experimented with using directly evaluation metrics, such as precision, as weights, but this did not lead to better fit.} 
+  \item Merge pairs $(w_i, w_j, s^{k}_{ij})$ of HJ, RT and AE datasets into the MJ dataset.
+\end{enumerate}
+
+\subsubsection{Evaluation of the Dataset.}
+
+Combination of the submissions outperforms single best submissions on the shared task (see \tablename~\ref{tab:ranks}). Since ranks were obtained on the test set, one should interpret this only as an indication of the reasonable quality of the MJ dataset. To evaluate a similarity measure using the MJ dataset, Spearman's rank correlation between vectors of machine judgments and input scores should be calculated.
+
+\begin{table}[ht]
+\centering
+\caption{Performance of relatedness measures obtained by combination of top submissions to the RUSSE shared task to the best submission.  }
+\label{tab:ranks}
+\begin{tabular}{l|ccc}
+\toprule
+
+                      & \textbf{HJ, $\rho$} & \textbf{RT, $AveP$} & \textbf{AE, $AveP$} \\ \midrule
+The best RUSSE submission & $0.762$             & $0.959$             & $0.985$             \\
+MJ ranks              & \textbf{$0.790$}    & $0.990$             & \textbf{$0.992$}    \\
+MJ exponent of ranks  & $0.772$             & \textbf{$0.996$}    & $0.991$             \\
+MJ sqrt of ranks      & $0.778$             & $0.983$             & $0.989$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{RDT: Russian Distributional Thesaurus}
+
+While resources presented above are accurate and represent different kinds of semantic phenomena, their low coverage makes them suitable only for evaluation and training. In this section we present a large scale resource in the same $(w_i, w_j, s_{ij})$ format, the first open Russian distributional thesaurus.
+
+\subsubsection{Construction of the Thesaurus.}
+
+In order to build the distributional thesaurus, we used the skip-gram model \cite{Mikolov:13} trained on a 12.9 billion word collection of Russian texts extracted from the digital library lib.rus.ec. According to the results of the shared task on Russian semantic similarity \cite{Panchenko:15}, this approach scored in the top $5$ among $105$ submissions \cite{Arefyev:15}. At the same time, the approach is completely unsupervised and language independent as we do not use any preprocessing except tokenization. Following our prior experiments \cite{Arefyev:15} we have selected the following parameters for the model: minimal word frequency -- $5$, number of dimensions in a word vector -- $500$, three or five iterations of the learning algorithm over the input corpus, context window size of $1$, $2$, $3$, $5$, $7$ and $10$ words.  For the most frequent $932\,000$ words, we calculated $250$ nearest neighbours with the cosine similarity between word vectors. These related words were lemmatized using pymorphy2.
+
+An important added value of our work is engineering. Training a model takes up to five days on a \texttt{r3.8xlarge} Amazon EC2 instance featuring $32$ cores and $244$ GB of RAM. Furthermore, calculation of the neighbours takes up to ten days for only one model, not to mention the time needed to test different configurations of the model. On the other hand, the resulting DT is a CSV file that can be easily used in any environment.
+
+\subsubsection{Evaluation.}
+
+We evaluated the quality of the distributional thesaurus based on HJ, RT and AE datasets presented above. Furthermore, we estimated absolute precision of extracted relations for $100$ words randomly sampled from the vocabulary of the HJ dataset. For each word we extracted the top $20$ similar words according to each model under evaluation resulting in $4\,127$ unique word pairs. Each pair was annotated by three distinct annotators with a binary choice as opposed to a graded judgement i.e. an annotator was supposed to indicate if a given word pair is plausibly related or not.\footnote{Annotation guidelines are available at \url{http://crowd.russe.nlpub.ru}.} Judgements were aggregated using a majority vote. In total, $395$ Russian-speaking volunteers participated in our crowdsourcing experiment with the substantial inter-rater agreement of $0.47$ in terms of Krippendorff's alpha. The best DT configurations are presented in \tablename~\ref{tab:evaluation}. The model \texttt{skipgram-dim500-win10-iter3} trained on the full corpus with context window size $10$ outperforms other models according to most of the metrics. We used this model to generate the final thesaurus DT (see Table 1).
+
+\begin{table}[ht]
+\footnotesize
+\centering
+
+\caption{Evaluation of different configurations of the Russian Distributional Thesaurus trained using the SkipGram model with vector sizes of 500 on the lib.rus.ec book corpus. We report correlations with human judgements (HJ), semantic relations from a thesaurus (RT), cognitive associations (AE) and manual annotation of top 20 similar words assessed with precision at $k$ ($P@k$). }
+\label{tab:evaluation}
+\begin{tabular}{llccccccc}
+\toprule
+\textbf{Model}              & \textbf{\#tokens} & \textbf{HJ, $\rho$} & \textbf{RT, $AveP$} & \textbf{AE, $AveP$} & \textbf{$P@1$}   & 
+\textbf{$P@5$}   & \textbf{$P@10$}  & \textbf{$P@20$}   \\ \midrule
+
+\texttt{win10-iter3} & $12.9$B     & \textbf{$0.699$}    & \textbf{$0.918$}    & \textbf{$0.975$}    & $0.971$          & \textbf{$0.971$} & $0.944$          & \textbf{$0.912$} \\
+\texttt{win10-iter5} &$2.5$B      & $0.675$             & $0.885$             & $0.970$             & \textbf{$1.000$} & \textbf{$0.971$} & \textbf{$0.947$} & $0.910$          \\
+\texttt{win5-iter3}  &$2.5$B      & $0.678$             & $0.886$             & $0.966$             & \textbf{$1.000$} & $0.953$          & $0.935$          & $0.881$          \\
+\texttt{win3-iter3}  &$2.5$B      & $0.680$             & $0.887$             & $0.959$             & $0.971$          & $0.953$          & $0.935$          & $0.884$         \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+% \begin{table}[ht]
+% \footnotesize
+% \centering
+% \caption{Evaluation of different configurations of the Russian Distributional Thesaurus trained on the lib.rus.ec book corpus, according to correlations with human judgements (HJ), semantic relations from a thesaurus (RT) and cognitive associations (AE). }
+% \label{tab:evaluation}
+% \begin{tabular}{ll|ccc}
+% \toprule
+% \textbf{Model}              & \textbf{Corpus size}, \textit{tokens} & \textbf{HJ, $\rho$} & \textbf{RT, $AveP$} & \textbf{AE, $AveP$}  \\ \midrule
+
+% \texttt{skipgram-dim500-win10-iter3} &  $12.9\cdot 10^{12}$     & \textbf{$0.699$}    & \textbf{$0.918$}    & \textbf{$0.975$}     \\
+% \texttt{skipgram-dim500-win10-iter5} & $2.5\cdot 10^{12}$     & $0.675$             & $0.885$             & $0.970$             \\
+% \texttt{skipgram-dim500-win5-iter3}  & $2.5\cdot 10^{12}$     & $0.678$             & $0.886$             & $0.966$              \\
+% \texttt{skipgram-dim500-win3-iter3}  & $2.5\cdot 10^{12}$     & $0.680$             & $0.887$             & $0.959$             
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+
+
+
+ 
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{figures/plot}
+\end{center}
+\caption{Precision at $k \in \{10,20\}$  top similar words of the RDT based on the skipgram model with 500 dimensions evaluated using crowdsourcing. The plot shows dependence of the performance of size of the context window (window size 1-10) and size of the training corpus (2.5 billions of tokens and 12.9 billions of tokens) and number of iterations during training (3 or 5).  }
+\label{graph-clustering-example}
+\end{figure}
+
+
+\section{Conclusion}
+
+In this paper, we presented five new language resources for the Russian language which can be used for training and evaluating  semantic relatedness measures, and to create NLP applications requiring semantic relatedness. These resources were used to perform a large-scale evaluation of $105$ submissions in a shared task on Russian semantic similarity. One of the best systems identified in this evaluation campaign was used to generate the first open Russian distributional thesaurus. Manual evaluation of this thesaurus, based on a large-scale crowdsourcing with native speakers, shows precision at 10 top similar words of $0.94$. All introduced resources are freely available for download.\footnote{\url{http://russe.nlpub.ru/downloads}}
+
+\section{Acknowledgements}
+
+We would like to acknowledge several funding organisations that partially supported this research. 
+Dmitry Ustalov was supported by the Russian Foundation for Basic Research (RFBR) according to the research project No.~16-37-00354~мол\_а. Denis Paperno was supported by the ERC 2011 Starting Independent Research Grant n. 283554. Natalia Loukashevich was supported by Russian Foundation for Humanities, grant No.~15-04-12017. Alexander Panchenko was supported by the Deutsche For\-schungs\-gemeinschaft (DFG) under the project "Joining Ontologies and Semantics Induced from Text (JOIN-T)".
+
+\bibliographystyle{splncs}
+\bibliography{rsr.aist2016}
+
+\end{document}
